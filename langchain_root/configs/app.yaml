@@ -1,0 +1,64 @@
+# configs/app.yaml
+app:
+  name: ai-news-rag
+  env: ${oc.env:APP_ENV,dev}
+
+# paths:
+#   chroma_dir: ${oc.env:CHROMA_DIR,data/chroma} # 벡터 디비(크로마) 파일이 저장될 위치
+#   sqlite_path: ${oc.env:SQLITE_PATH,data/processed/app.db} # SQLite 데이터베이스 파일이 저장될 위치
+
+paths:
+  chroma_dir: data/chroma
+  sqlite_path: data/processed/app.db
+
+sources:
+  rss:
+    - https://blog.google/rss/
+    - https://openai.com/news/rss.xml
+    - https://aws.amazon.com/ko/blogs/machine-learning/feed/
+    - https://bair.berkeley.edu/blog/feed.xml
+    - https://rss.arxiv.org/rss/cs.LG
+    - https://huggingface.co/blog/feed.xml
+  language_allow: [ko, en]
+
+# https://ai.googleblog.com/feeds/posts/default
+# 원본은 rss.xml 앞의 /news 제거 상태이다.
+
+# 수집한 데이터 처리
+ingest:
+  dedup: # 중복 제거
+    method: content_hash # 콘텐츠 해시 기반 중복 제거
+    normalize: true    # 공백/추적파라미터 제거 등
+  date_cutoff_days: 7  # 최근 N일만 우선 수집(옵션)
+
+retrieval:
+  top_k: 6 # 질문과 가장 관련 있는 기사를 6개 가져와라
+  # mmr이란? (Maximal Marginal Relevance): 다양성과 관련성의 균형을 맞추기 위한 기법
+  mmr: 
+    enabled: true # 다양성 기능 켜자
+    lambda: 0.6 # 100% 비슷한 것만 뽑지 말고, 60%는 다양성을 고려해서 뽑자.
+  date_filter_days: 7 # 최근 7일에서 찾아라
+  filters:
+    source: []   # 특정 출처 필터링 시 사용
+
+generation:
+  provider: solar
+  model: solar-pro         # 팀에서 실제 사용할 모델명으로 교체
+  temperature: 0.2 # llm의 창의성 조절. 0에 가까울수록 사실 기반으로, 1에 가까울수록 소설 쓴다.
+  max_context_tokens: 3000
+  require_sources: true    # 출처(URL) 강제
+  answer_format: markdown
+
+evaluation:
+  langsmith:
+    enabled: true
+    project: ai-news-rag
+    default_tags: [baseline, CHUNK_v1, EMB_v1, MMR_on]
+
+logging:
+  level: INFO
+  wandb:
+    enabled: true
+    project: ${oc.env:WANDB_PROJECT,ai-news-rag}
+    entity: ${oc.env:WANDB_ENTITY,}
+    tags: [dev]

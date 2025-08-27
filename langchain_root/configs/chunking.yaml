@@ -1,0 +1,29 @@
+# configs/chunking.yaml
+version: CHUNK_v1
+
+# 청킹 방법: 길이 기반을 기본 규칙으로 + 재귀적 분할의 원리 더한 전략
+# 재귀적 분할이란? 의미 있는 경계(문단 -> 문장 -> 단어) 순으로 자르기. 
+# 재귀적 분할 아이디어: respect_paragraphs가 true일 때, 단락 경계를 우선 고려한다.
+strategy:
+  type: length              # length | paragraph | claim_quote
+  tokens: 600               # 길이 기반 (기본값)
+  overlap_ratio: 0.15       # 15% 오버랩
+  respect_paragraphs: true  # 만약 자르려고 하는 청크가 단락을 가로막는다면, 단락 경계를 우선 고려한다.
+
+limits:
+  min_chars: 200            # 너무 짧은 청크는 제거
+  max_chars: 3500           # 과도하게 긴 청크 방지
+
+normalization:
+  strip_whitespace: true
+  collapse_newlines: true
+  remove_tracking_params: true
+  to_lower: false 
+
+section_based:
+  enabled: false
+  headers: ["h1","h2","h3"]
+
+claim_quote_based:
+  enabled: false
+  # 규제/발언 기사에서 켜서 실험(추후 코드 바꾸기)

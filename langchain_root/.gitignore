@@ -1,0 +1,44 @@
+# Python 기본
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# 가상환경
+.venv/
+venv/
+.envrc
+
+# 환경설정/비밀키
+!*.env.example   # 예시 파일은 버전에 포함 (실제 키는 제외)
+
+# 데이터/결과물
+data/chroma/
+data/processed/
+outputs/
+wandb/
+logs/
+
+# Jupyter / 노트북 캐시
+.ipynb_checkpoints/
+*.ipynb~
+
+# macOS / 기타 OS 특수 파일
+.DS_Store
+Thumbs.db
+
+# Hydra/Streamlit 등 런타임 생성 파일
+multirun/
+hydra/
+.streamlit/
+
+# SQLite DB + 임시 파일
+data/processed/*.db
+data/processed/*.db-shm
+data/processed/*.db-wal
+
+
+# 실제 비밀 키
+.env
+../.env
